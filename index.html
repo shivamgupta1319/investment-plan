@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Investment Plan for a 25 to 30 Year Old</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page, vertical scrolling narrative structure is used to guide the user through their financial journey logically. The flow starts with foundational security (emergency fund/insurance), moves to the wealth accumulation engine (interactive SIP calculator), visualizes the investment strategy (asset allocation charts), and concludes with the retirement phase (SWP calculator). This structure was chosen to transform the static report into a personalized, step-by-step interactive experience, enhancing user engagement and understanding by allowing them to see their own potential financial future unfold. -->
+    <!-- Visualization & Content Choices: 
+        - Emergency Fund/Insurance: Report Info -> Personalized safety net calculation. Goal -> Inform/Action. Viz -> Interactive input fields with dynamic text output. Justification -> Personalizes abstract goals. Library -> Vanilla JS.
+        - SIP Growth Projections: Report Info -> Table 4 data. Goal -> Compare/Change. Viz -> Interactive Line Chart comparing Flat vs. Step-Up SIP with user controls. Justification -> Powerfully visualizes the core concept of long-term, stepped-up compounding. Library -> Chart.js.
+        - Asset Allocation: Report Info -> Table 2 data. Goal -> Inform/Organize. Viz -> Donut chart for main allocation, bar chart for equity breakdown. Justification -> Intuitive and clear way to show portfolio composition and sub-composition. Library -> Chart.js.
+        - SWP Calculation: Report Info -> Table 5 data. Goal -> Inform. Viz -> Interactive calculator showing monthly income from a final corpus. Justification -> Connects the accumulation phase to the tangible retirement outcome, completing the financial lifecycle narrative. Library -> Vanilla JS.
+        - All diagrams and flows use structured HTML/CSS with Tailwind for a clean, non-plugin-dependent presentation. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #383733;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #D97706;
+            border-bottom-color: #D97706;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .accent-bg {
+            background-color: #0C4A6E;
+        }
+
+        .accent-text {
+            color: #D97706;
+        }
+
+        .btn-primary {
+            background-color: #0C4A6E;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #07334D;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-800">🚀</span>
+                    <span class="ml-2 font-bold text-lg text-gray-800">Investment Journey</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#foundation" class="nav-link px-2 py-1">Foundation</a>
+                    <a href="#growth" class="nav-link px-2 py-1">Growth</a>
+                    <a href="#blueprint" class="nav-link px-2 py-1">Blueprint</a>
+                    <a href="#retirement" class="nav-link px-2 py-1">Retirement</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900">Your 35-Year Journey to
+                    <span class="accent-text">Financial Freedom</span>
+                </h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">This interactive plan translates the
+                    principles of smart investing into a personalized roadmap. Starting at age 25 with a ₹50,000 monthly
+                    investment, see how disciplined saving can build a multi-crore corpus for your future.</p>
+                <div class="mt-8">
+                    <a href="#foundation" class="btn-primary">Start Your Plan</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="foundation" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Step 1: Build Your Financial Bedrock</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Before investing, it's crucial to build a
+                        safety net. This protects your long-term goals from unexpected life events. Use these
+                        calculators to determine your personalized security targets.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                    <div class="stat-card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span
+                                class="text-3xl mr-3">🛡️</span>Emergency Fund Calculator</h3>
+                        <p class="text-gray-600 mb-4">A fund to cover 9-12 months of essential living expenses in case
+                            of job loss or other emergencies. This is your financial shock absorber.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="monthly-expenses" class="font-medium text-gray-700">Your Monthly Essential
+                                    Expenses (₹)</label>
+                                <input type="number" id="monthly-expenses" value="30000"
+                                    class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500">
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-lg">
+                                <p class="font-medium text-gray-800">Your Target Emergency Corpus:</p>
+                                <p id="emergency-fund-result" class="text-3xl font-bold accent-text">₹8,10,000</p>
+                                <p class="text-sm text-gray-600">(for 9 months)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">❤️</span>Term
+                            Life Insurance Check</h3>
+                        <p class="text-gray-600 mb-4">To protect your dependents' future, your life cover should be
+                            15-20 times your annual income. Lock in low premiums at a young age.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="annual-income" class="font-medium text-gray-700">Your Current Annual Income
+                                    (₹)</label>
+                                <input type="number" id="annual-income" value="1200000"
+                                    class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500">
+                            </div>
+                            <div class="bg-sky-50 p-4 rounded-lg">
+                                <p class="font-medium text-gray-800">Your Recommended Life Cover:</p>
+                                <p id="life-cover-result" class="text-3xl font-bold text-sky-700">₹2.40 Crores</p>
+                                <p class="text-sm text-gray-600">(20x your annual income)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="growth" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Step 2: Your Growth Engine (SIP)</h2>
+                    <p class="mt-3 max-w-3xl mx-auto text-lg text-gray-600">A Systematic Investment Plan (SIP) is your
+                        tool for wealth accumulation. This interactive chart demonstrates the power of consistent
+                        investing and the dramatic impact of a 'Step-Up' SIP, where you increase your investment
+                        annually.</p>
+                </div>
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 p-6 bg-gray-50 rounded-lg border">
+                        <h3 class="text-xl font-bold mb-4">Control Your Projection</h3>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <label for="sip-amount" class="font-medium">Monthly SIP (₹)</label>
+                                <input type="range" id="sip-amount" min="10000" max="100000" step="1000" value="50000"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="text-center font-bold" id="sip-amount-label">₹50,000</div>
+                            </div>
+                            <div>
+                                <label for="sip-tenure" class="font-medium">Investment Tenure (Years)</label>
+                                <input type="range" id="sip-tenure" min="5" max="40" step="1" value="35"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="text-center font-bold" id="sip-tenure-label">35 Years</div>
+                            </div>
+                            <div>
+                                <label for="sip-return" class="font-medium">Expected Annual Return (%)</label>
+                                <input type="range" id="sip-return" min="8" max="15" step="0.5" value="12"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="text-center font-bold" id="sip-return-label">12.0%</div>
+                            </div>
+                            <div>
+                                <label for="sip-stepup" class="font-medium">Annual Step-Up (%)</label>
+                                <input type="range" id="sip-stepup" min="0" max="15" step="1" value="10"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="text-center font-bold" id="sip-stepup-label">10%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="chart-container">
+                            <canvas id="sipChart"></canvas>
+                        </div>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-600">Total Invested</p>
+                                <p id="total-invested-stepup" class="text-2xl font-bold text-gray-800">₹1.22 Cr</p>
+                                <p class="text-xs text-gray-500">with 10% Step-Up</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <p class="text-sm font-medium text-green-800">Final Corpus (Step-Up)</p>
+                                <p id="final-corpus-stepup" class="text-2xl md:text-3xl font-bold text-green-600">₹5.05
+                                    Cr</p>
+                                <p class="text-xs text-green-700">The Power of Stepping Up!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="blueprint" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Step 3: Your Portfolio Blueprint</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Asset allocation is key to long-term
+                        success. For a 25-year-old, an aggressive growth strategy is recommended. This section
+                        visualizes the proposed portfolio mix.</p>
+                </div>
+                <div class="grid md:grid-cols-5 gap-8">
+                    <div class="md:col-span-2">
+                        <h3 class="text-xl font-bold mb-4 text-center">Overall Asset Allocation</h3>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center text-gray-600">This mix balances high-growth potential from
+                            equities with the stability of debt and a hedge from gold.</div>
+                    </div>
+                    <div class="md:col-span-3">
+                        <h3 class="text-xl font-bold mb-4 text-center">Equity Allocation Breakdown</h3>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="equityAllocationChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center text-gray-600">The equity portion is diversified across market caps
+                            to capture growth from established leaders and emerging stars.</div>
+                    </div>
+                </div>
+                <div class="stat-card mt-12 p-6">
+                    <h3 class="text-2xl font-bold text-center mb-4">Tactical SIP Plan for ₹50,000/month</h3>
+                    <p class="text-center text-gray-600 mb-6">Here is a practical breakdown of your monthly investment,
+                        integrating tax-saving with your growth objectives.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 font-medium">Fund Category</th>
+                                    <th class="p-3 font-medium text-right">Monthly SIP (₹)</th>
+                                    <th class="p-3 font-medium text-right">% of Total</th>
+                                    <th class="p-3 font-medium hidden md:table-cell">Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">Large-Cap (Index)</td>
+                                    <td class="p-3 text-right">15,000</td>
+                                    <td class="p-3 text-right">30%</td>
+                                    <td class="p-3 hidden md:table-cell">Core stability, low cost</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">ELSS (Tax Saver)</td>
+                                    <td class="p-3 text-right">12,500</td>
+                                    <td class="p-3 text-right">25%</td>
+                                    <td class="p-3 hidden md:table-cell">Tax saving + Growth</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">Mid-Cap</td>
+                                    <td class="p-3 text-right">7,500</td>
+                                    <td class="p-3 text-right">15%</td>
+                                    <td class="p-3 hidden md:table-cell">High growth potential</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">Small-Cap</td>
+                                    <td class="p-3 text-right">5,000</td>
+                                    <td class="p-3 text-right">10%</td>
+                                    <td class="p-3 hidden md:table-cell">Aggressive growth</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">Debt Fund</td>
+                                    <td class="p-3 text-right">7,500</td>
+                                    <td class="p-3 text-right">15%</td>
+                                    <td class="p-3 hidden md:table-cell">Stability & rebalancing</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold">Gold Fund</td>
+                                    <td class="p-3 text-right">2,500</td>
+                                    <td class="p-3 text-right">5%</td>
+                                    <td class="p-3 hidden md:table-cell">Inflation hedge</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="retirement" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Step 4: The Retirement Phase (SWP)</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">The goal of accumulation is to fund your
+                        retirement. A Systematic Withdrawal Plan (SWP) turns your corpus into a regular, tax-efficient
+                        income stream. See how your projected wealth translates into a monthly "pension".</p>
+                </div>
+                <div class="stat-card max-w-2xl mx-auto p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Retirement Income Calculator</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="retirement-corpus" class="font-medium text-gray-700">Your Retirement Corpus (₹
+                                Crores)</label>
+                            <input type="number" id="retirement-corpus" value="5.05" step="0.1"
+                                class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label for="withdrawal-rate" class="font-medium text-gray-700">Sustainable Withdrawal Rate
+                                (%)</label>
+                            <input type="number" id="withdrawal-rate" value="4" step="0.5"
+                                class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500">
+                        </div>
+                    </div>
+                    <div class="mt-6 accent-bg text-white p-6 rounded-lg text-center">
+                        <p class="font-medium uppercase tracking-wider">Your Estimated Monthly Retirement Income:</p>
+                        <p id="swp-result" class="text-4xl md:text-5xl font-bold my-2">₹1,68,333</p>
+                        <p class="text-sm opacity-80">This income is highly tax-efficient compared to traditional
+                            options.</p>
+                    </div>
+                </div>
+                <div class="mt-12 text-center max-w-3xl mx-auto">
+                    <h3 class="text-2xl font-bold">Stay the Course: Review & Rebalance</h3>
+                    <p class="mt-4 text-gray-600 text-lg">Your investment journey doesn't end once you've started. It's
+                        vital to review your portfolio annually and rebalance it back to your target allocation if it
+                        drifts. This disciplined approach is a cornerstone of long-term risk management and ensures your
+                        portfolio evolves with your life stage.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>This is an illustrative, interactive financial plan based on the provided report. It is for educational
+                purposes only and not financial advice. Consult with a qualified financial advisor before making any
+                investment decisions.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const formatCurrency = (value) => {
+                if (value >= 10000000) {
+                    return `₹${(value / 10000000).toFixed(2)} Cr`;
+                } else if (value >= 100000) {
+                    return `₹${(value / 100000).toFixed(2)} Lakhs`;
+                }
+                return `₹${value.toLocaleString('en-IN')}`;
+            };
+
+            const formatCurrencyShort = (value) => `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+
+            const monthlyExpensesInput = document.getElementById('monthly-expenses');
+            const emergencyFundResult = document.getElementById('emergency-fund-result');
+            const annualIncomeInput = document.getElementById('annual-income');
+            const lifeCoverResult = document.getElementById('life-cover-result');
+
+            const sipAmountInput = document.getElementById('sip-amount');
+            const sipAmountLabel = document.getElementById('sip-amount-label');
+            const sipTenureInput = document.getElementById('sip-tenure');
+            const sipTenureLabel = document.getElementById('sip-tenure-label');
+            const sipReturnInput = document.getElementById('sip-return');
+            const sipReturnLabel = document.getElementById('sip-return-label');
+            const sipStepupInput = document.getElementById('sip-stepup');
+            const sipStepupLabel = document.getElementById('sip-stepup-label');
+
+            const totalInvestedStepup = document.getElementById('total-invested-stepup');
+            const finalCorpusStepup = document.getElementById('final-corpus-stepup');
+
+            const retirementCorpusInput = document.getElementById('retirement-corpus');
+            const withdrawalRateInput = document.getElementById('withdrawal-rate');
+            const swpResult = document.getElementById('swp-result');
+
+            function calculateFoundation() {
+                const expenses = parseFloat(monthlyExpensesInput.value) || 0;
+                emergencyFundResult.textContent = formatCurrencyShort(expenses * 9);
+
+                const income = parseFloat(annualIncomeInput.value) || 0;
+                lifeCoverResult.textContent = formatCurrency(income * 20);
+            }
+
+            let sipChartInstance;
+            function calculateSIP() {
+                const P = parseFloat(sipAmountInput.value);
+                const t = parseFloat(sipTenureInput.value);
+                const r = parseFloat(sipReturnInput.value) / 100;
+                const stepUpRate = parseFloat(sipStepupInput.value) / 100;
+
+                sipAmountLabel.textContent = formatCurrencyShort(P);
+                sipTenureLabel.textContent = `${t} Years`;
+                sipReturnLabel.textContent = `${(r * 100).toFixed(1)}%`;
+                sipStepupLabel.textContent = `${(stepUpRate * 100)}%`;
+
+                const i = r / 12;
+                const n = t * 12;
+
+                const labels = Array.from({ length: t + 1 }, (_, year) => `Year ${year}`);
+                const flatData = [0];
+                const stepUpData = [0];
+
+                let totalInvestedFlat = 0;
+                let totalInvestedStepUp = 0;
+                let currentStepUpP = P;
+
+                for (let year = 1; year <= t; year++) {
+                    totalInvestedFlat += P * 12;
+                    let flatCorpus = P * (((Math.pow(1 + i, year * 12) - 1) / i) * (1 + i));
+                    flatData.push(flatCorpus);
+
+                    let stepUpCorpus = 0;
+                    let yearlyP = P;
+                    for (let y = 0; y < year; y++) {
+                        let investment_this_year = yearlyP * 12;
+                        let future_value_of_this_year = investment_this_year * Math.pow(1 + r, year - y - 1);
+
+                        let monthly_i = r / 12;
+                        let fv_sip = yearlyP * (((Math.pow(1 + monthly_i, 12) - 1) / monthly_i));
+
+                        stepUpCorpus += fv_sip * Math.pow(1 + r, year - y - 1);
+
+                        yearlyP *= (1 + stepUpRate);
+                    }
+                    stepUpData.push(stepUpCorpus);
+                }
+
+                let finalStepUpP = P;
+                for (let year = 1; year <= t; year++) {
+                    totalInvestedStepUp += finalStepUpP * 12;
+                    finalStepUpP *= (1 + stepUpRate);
+                }
+
+                totalInvestedStepup.textContent = formatCurrency(totalInvestedStepUp);
+                const finalCorpus = stepUpData[stepUpData.length - 1];
+                finalCorpusStepup.textContent = formatCurrency(finalCorpus);
+                retirementCorpusInput.value = (finalCorpus / 10000000).toFixed(2);
+
+                updateSIPChart(labels, flatData, stepUpData);
+                calculateSWP();
+            }
+
+            function updateSIPChart(labels, flatData, stepUpData) {
+                if (sipChartInstance) {
+                    sipChartInstance.data.labels = labels;
+                    sipChartInstance.data.datasets[0].data = flatData;
+                    sipChartInstance.data.datasets[1].data = stepUpData;
+                    sipChartInstance.update();
+                } else {
+                    const ctx = document.getElementById('sipChart').getContext('2d');
+                    sipChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Flat SIP',
+                                data: flatData,
+                                borderColor: 'rgb(156, 163, 175)',
+                                backgroundColor: 'rgba(156, 163, 175, 0.1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.1
+                            }, {
+                                label: 'Step-Up SIP',
+                                data: stepUpData,
+                                borderColor: 'rgb(22, 163, 74)',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: function (value, index, values) {
+                                            return formatCurrency(value).replace('₹', '');
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: { position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += formatCurrencyShort(context.parsed.y);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            function createAllocationCharts() {
+                const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+                new Chart(allocationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Equity', 'Debt', 'Gold'],
+                        datasets: [{
+                            data: [80, 15, 5],
+                            backgroundColor: ['#0C4A6E', '#F59E0B', '#6D28D9'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+                const equityCtx = document.getElementById('equityAllocationChart').getContext('2d');
+                new Chart(equityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Large-Cap', 'ELSS/Flexi-Cap', 'Mid-Cap', 'Small-Cap'],
+                        datasets: [{
+                            label: '% of Equity Allocation',
+                            data: [32, 25, 16, 12],
+                            backgroundColor: ['#3B82F6', '#10B981', '#F97316', '#EF4444'],
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: (value) => value + '%'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function calculateSWP() {
+                const corpus = (parseFloat(retirementCorpusInput.value) || 0) * 10000000;
+                const rate = (parseFloat(withdrawalRateInput.value) || 0) / 100;
+                const monthlyIncome = (corpus * rate) / 12;
+                swpResult.textContent = formatCurrencyShort(monthlyIncome);
+            }
+
+            [monthlyExpensesInput, annualIncomeInput].forEach(input => input.addEventListener('input', calculateFoundation));
+            [sipAmountInput, sipTenureInput, sipReturnInput, sipStepupInput].forEach(input => input.addEventListener('input', calculateSIP));
+            [retirementCorpusInput, withdrawalRateInput].forEach(input => input.addEventListener('input', calculateSWP));
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section[id]');
+
+            const onScroll = () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', onScroll);
+
+            calculateFoundation();
+            calculateSIP();
+            createAllocationCharts();
+            calculateSWP();
+            onScroll();
+        });
+    </script>
+</body>
+
+</html>
